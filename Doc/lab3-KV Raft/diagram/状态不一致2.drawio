@@ -1,0 +1,101 @@
+<mxfile host="app.diagrams.net" modified="2023-11-13T08:07:08.529Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36" etag="nUjqvj0nHpHdc4dQ_SKW" version="22.1.0" type="device">
+  <diagram name="第 1 页" id="sqI9iw7Of4PPsXGYWBlM">
+    <mxGraphModel dx="1432" dy="833" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="10000" pageHeight="10000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="C1qdJ5KPPi_jr764KwP9-1" value="" style="endArrow=none;dashed=1;html=1;rounded=0;" edge="1" parent="1" source="C1qdJ5KPPi_jr764KwP9-8">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="240" y="400" as="sourcePoint" />
+            <mxPoint x="1680" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="C1qdJ5KPPi_jr764KwP9-2" value="&lt;font face=&quot;Comic Sans MS&quot; style=&quot;font-size: 24px;&quot;&gt;raft&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="250" y="430" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="C1qdJ5KPPi_jr764KwP9-3" value="&lt;font face=&quot;Comic Sans MS&quot; style=&quot;font-size: 24px;&quot;&gt;kvserver&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="260" y="340" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="C1qdJ5KPPi_jr764KwP9-4" value="&lt;font face=&quot;Comic Sans MS&quot; style=&quot;font-size: 18px;&quot;&gt;由于主动快照还没改变raft状态，若此时follower先接受leader发来的快照（snapshotIndex=198）&lt;br&gt;&lt;br&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&amp;nbsp;1. 裁剪日志&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&amp;nbsp;2. 更新rf.lastIncludedIndex=198&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&amp;nbsp;3. 更新rf.lastApplied=198&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&amp;nbsp;4. 持久化&lt;/span&gt;&lt;/div&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#ffe6cc;" vertex="1" parent="1">
+          <mxGeometry x="420" y="500" width="290" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="C1qdJ5KPPi_jr764KwP9-5" value="" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;fillColor=#ffe6cc;strokeColor=#d79b00;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="570" y="490" as="sourcePoint" />
+            <mxPoint x="920" y="300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="C1qdJ5KPPi_jr764KwP9-6" value="&lt;font face=&quot;Comic Sans MS&quot; style=&quot;font-size: 18px;&quot;&gt;kvserver检测到raftstatesize超过阈值，需要进行主动快照（snapshotIndex=200）&lt;br&gt;&lt;br&gt;&lt;div style=&quot;text-align: left;&quot;&gt;将当前kvserver相关状态打上快照（快照中LogLastApplied=200，kvDB和session均是执行完log[200]后状态）&lt;/div&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#dae8fc;" vertex="1" parent="1">
+          <mxGeometry x="350" y="100" width="310" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="C1qdJ5KPPi_jr764KwP9-7" value="&lt;font face=&quot;Comic Sans MS&quot; style=&quot;font-size: 18px;&quot;&gt;kvserver从applyCh中取出发来的被动快照数据，并安装该快照&lt;br&gt;&lt;br&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&amp;nbsp;1. kvDB和session回退到执行完&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; log[198]后的状态&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&amp;nbsp;2. 回退kv.LogLastApplied&lt;span style=&quot;background-color: initial;&quot;&gt;=198&lt;/span&gt;&lt;/div&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#ffe6cc;" vertex="1" parent="1">
+          <mxGeometry x="850" y="115" width="280" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="C1qdJ5KPPi_jr764KwP9-9" value="&lt;font face=&quot;Comic Sans MS&quot; style=&quot;font-size: 18px;&quot;&gt;server检测到snapshotIndex=200，比当前rf.lastIncludedIndex=198大，接受主动快照&lt;br&gt;&lt;br&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;div style=&quot;border-color: var(--border-color);&quot;&gt;&amp;nbsp;1. 裁剪日志&lt;/div&gt;&lt;div style=&quot;border-color: var(--border-color);&quot;&gt;&lt;span style=&quot;border-color: var(--border-color); background-color: initial;&quot;&gt;&amp;nbsp;2. 更新rf.lastIncludedIndex=200&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;border-color: var(--border-color);&quot;&gt;&lt;span style=&quot;border-color: var(--border-color); background-color: initial;&quot;&gt;&amp;nbsp;3. rf.lastApplied还是原值198（主动快照不更&amp;nbsp; &amp;nbsp; 新rf.lastApplied和rf.commitIndex）&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;border-color: var(--border-color);&quot;&gt;&lt;span style=&quot;border-color: var(--border-color); background-color: initial;&quot;&gt;&amp;nbsp;4. 持久化&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#dae8fc;" vertex="1" parent="1">
+          <mxGeometry x="840" y="500" width="380" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="C1qdJ5KPPi_jr764KwP9-10" value="" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;fillColor=#dae8fc;strokeColor=#6c8ebf;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="640" y="310" as="sourcePoint" />
+            <mxPoint x="1010" y="490" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="C1qdJ5KPPi_jr764KwP9-11" value="&lt;font face=&quot;Comic Sans MS&quot;&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;通知raft层进行主动快照&lt;/span&gt;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;rotation=25;" vertex="1" parent="1">
+          <mxGeometry x="780" y="390" width="230" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="C1qdJ5KPPi_jr764KwP9-12" value="&lt;font face=&quot;Comic Sans MS&quot; style=&quot;font-size: 18px;&quot;&gt;rf.applier()应用日志，检测到&lt;br&gt;rf.lastApplied &amp;lt; rf.lastIncludedIndex&lt;br&gt;&lt;br&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;div style=&quot;border-color: var(--border-color);&quot;&gt;&amp;nbsp;1. 更新rf.lastApplied=200&lt;/div&gt;&lt;div style=&quot;border-color: var(--border-color);&quot;&gt;&lt;span style=&quot;border-color: var(--border-color); background-color: initial;&quot;&gt;&amp;nbsp;2. 下一次将log[201]发送到applyCh交给&amp;nbsp; &amp;nbsp; &amp;nbsp; kvserver应用&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#d5e8d4;" vertex="1" parent="1">
+          <mxGeometry x="1300" y="510" width="330" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="C1qdJ5KPPi_jr764KwP9-13" value="" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;fillColor=#d5e8d4;strokeColor=#82b366;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1230" y="610" as="sourcePoint" />
+            <mxPoint x="1290" y="610" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="C1qdJ5KPPi_jr764KwP9-14" value="" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;fillColor=#d5e8d4;strokeColor=#82b366;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1440" y="500" as="sourcePoint" />
+            <mxPoint x="1440" y="300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="C1qdJ5KPPi_jr764KwP9-15" value="&lt;font face=&quot;Comic Sans MS&quot; style=&quot;font-size: 18px;&quot;&gt;kvserver从applyCh中取出log[201]并应用&lt;br&gt;&lt;br&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;&amp;nbsp;1. 执行log[201]中的指令&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: left;&quot;&gt;&amp;nbsp;2. 更新kv.LogLastApplied&lt;span style=&quot;background-color: initial;&quot;&gt;=201&lt;/span&gt;&lt;/div&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#000000;fillColor=#d5e8d4;" vertex="1" parent="1">
+          <mxGeometry x="1310" y="115" width="280" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="C1qdJ5KPPi_jr764KwP9-16" value="&lt;font face=&quot;Comic Sans MS&quot;&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;发送log[201]到applyCh&lt;/span&gt;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;rotation=0;" vertex="1" parent="1">
+          <mxGeometry x="1440" y="420" width="230" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="C1qdJ5KPPi_jr764KwP9-18" value="" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;fillColor=#d5e8d4;strokeColor=#82b366;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1140" y="199.5" as="sourcePoint" />
+            <mxPoint x="1290" y="199.5" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="C1qdJ5KPPi_jr764KwP9-19" value="" style="curved=1;endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1090" y="110" as="sourcePoint" />
+            <mxPoint x="1380" y="110" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1120" y="30" />
+              <mxPoint x="1260" y="40" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="C1qdJ5KPPi_jr764KwP9-20" value="&lt;font color=&quot;#ff1d0d&quot; face=&quot;Comic Sans MS&quot;&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;kvDB和session为刚执行完log[198]的状态，但是紧接着执行的指令却是log[201]，这之间若有append指令则丢失了&lt;/span&gt;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;rotation=0;" vertex="1" parent="1">
+          <mxGeometry x="1325" y="20" width="250" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="C1qdJ5KPPi_jr764KwP9-21" value="&lt;font color=&quot;#ff1d0d&quot; face=&quot;Comic Sans MS&quot;&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;raft层则为刚执行完log[201]的状态，认为这之前的log均apply了&lt;/span&gt;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;rotation=0;" vertex="1" parent="1">
+          <mxGeometry x="1325" y="730" width="270" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="C1qdJ5KPPi_jr764KwP9-22" value="" style="endArrow=none;dashed=1;html=1;rounded=0;" edge="1" parent="1" target="C1qdJ5KPPi_jr764KwP9-8">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="240" y="400" as="sourcePoint" />
+            <mxPoint x="1680" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="C1qdJ5KPPi_jr764KwP9-8" value="&lt;font face=&quot;Comic Sans MS&quot;&gt;&lt;span style=&quot;font-size: 18px;&quot;&gt;将被动快照发送到applyCh&lt;/span&gt;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;rotation=332;" vertex="1" parent="1">
+          <mxGeometry x="560" y="390" width="230" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

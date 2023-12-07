@@ -1,0 +1,83 @@
+<mxfile host="app.diagrams.net" modified="2023-07-12T06:53:09.474Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36" etag="9PFLk4IrRgPWp6QVqmkh" version="21.1.4" type="device">
+  <diagram name="第 1 页" id="FZJmRkkW8R2Tms1hYAiO">
+    <mxGraphModel dx="1216" dy="591" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="10000" pageHeight="10000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="zuoMcM_HNG_YOZGho7tY-1" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Client第一次启动&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="90" y="290" width="110" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="zuoMcM_HNG_YOZGho7tY-3" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="210" y="299.5" as="sourcePoint" />
+            <mxPoint x="450" y="300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="zuoMcM_HNG_YOZGho7tY-4" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;随机选一个server来连接&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="310" y="260" width="110" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="zuoMcM_HNG_YOZGho7tY-5" value="" style="shape=curlyBracket;whiteSpace=wrap;html=1;rounded=1;labelPosition=left;verticalLabelPosition=middle;align=right;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="470" y="240" width="20" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="zuoMcM_HNG_YOZGho7tY-6" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;选的这个server是leader&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="500" y="350" width="140" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="zuoMcM_HNG_YOZGho7tY-7" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;选的这个server不是leader&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="500" y="240" width="140" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="zuoMcM_HNG_YOZGho7tY-9" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="640" y="250" as="sourcePoint" />
+            <mxPoint x="710" y="250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="zuoMcM_HNG_YOZGho7tY-10" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;这个server拒绝client的请求并返回它所知道的最新的leader id&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="720" y="240" width="140" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="zuoMcM_HNG_YOZGho7tY-11" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="860" y="250" as="sourcePoint" />
+            <mxPoint x="940" y="250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="zuoMcM_HNG_YOZGho7tY-12" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;client根据这个leader id再直接去连接leader&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="940" y="240" width="140" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="zuoMcM_HNG_YOZGho7tY-13" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="640" y="360" as="sourcePoint" />
+            <mxPoint x="750" y="360" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="zuoMcM_HNG_YOZGho7tY-14" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;发送请求&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="640" y="340" width="110" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="zuoMcM_HNG_YOZGho7tY-15" value="" style="shape=curlyBracket;whiteSpace=wrap;html=1;rounded=1;labelPosition=left;verticalLabelPosition=middle;align=right;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="770" y="310" width="20" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="zuoMcM_HNG_YOZGho7tY-16" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;leader没挂并正常回复client&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="800" y="310" width="130" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="zuoMcM_HNG_YOZGho7tY-17" value="&lt;span style=&quot;font-size: 18px;&quot;&gt;……&lt;/span&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="910" y="315" width="130" height="10" as="geometry" />
+        </mxCell>
+        <mxCell id="zuoMcM_HNG_YOZGho7tY-22" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="270" y="300" as="targetPoint" />
+            <mxPoint x="885" y="440" as="sourcePoint" />
+            <Array as="points">
+              <mxPoint x="885" y="480" />
+              <mxPoint x="270" y="480" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="zuoMcM_HNG_YOZGho7tY-20" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;leader挂了，client请求超时未收到回复&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="800" y="400" width="170" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="zuoMcM_HNG_YOZGho7tY-23" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;重新&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="480" y="450" width="110" height="20" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

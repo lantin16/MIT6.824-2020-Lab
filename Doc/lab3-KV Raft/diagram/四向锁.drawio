@@ -1,0 +1,88 @@
+<mxfile host="app.diagrams.net" modified="2023-07-25T01:45:56.525Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36" etag="-08K2N-YS_Dr2dzEFT33" version="21.6.5" type="device">
+  <diagram name="第 1 页" id="7Biunpa2JNx_0wgUib2D">
+    <mxGraphModel dx="1216" dy="668" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="10000" pageHeight="10000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="bp1sv8VDgxhbqyy1A0z1-1" value="" style="endArrow=none;dashed=1;html=1;rounded=0;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="50" y="400" as="sourcePoint" />
+            <mxPoint x="1180" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="bp1sv8VDgxhbqyy1A0z1-2" value="&lt;font style=&quot;font-size: 24px;&quot;&gt;&lt;b style=&quot;&quot;&gt;Raft层&lt;/b&gt;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="90" y="560" width="80" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="bp1sv8VDgxhbqyy1A0z1-3" value="&lt;font style=&quot;font-size: 24px;&quot;&gt;&lt;b style=&quot;&quot;&gt;应用层&lt;/b&gt;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="70" y="250" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="bp1sv8VDgxhbqyy1A0z1-4" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;br&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="330" y="140" width="240" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="bp1sv8VDgxhbqyy1A0z1-5" value="" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="160" y="234.5" as="sourcePoint" />
+            <mxPoint x="290" y="234.5" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="bp1sv8VDgxhbqyy1A0z1-9" value="&lt;font style=&quot;font-size: 16px;&quot;&gt;client通过RPC发来请求，调用kvserver的handle函数（Get / PutAppend），&lt;b&gt;拿到了锁 kv.mu&lt;/b&gt;，并调用kv.rf.Start()，&lt;b&gt;等待Start()执行完才会释放锁kv.mu&lt;/b&gt;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="350" y="165" width="200" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="bp1sv8VDgxhbqyy1A0z1-7" value="" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="449.5" y="340" as="sourcePoint" />
+            <mxPoint x="449.5" y="480" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="bp1sv8VDgxhbqyy1A0z1-12" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;br&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="330" y="500" width="240" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="bp1sv8VDgxhbqyy1A0z1-11" value="&lt;font style=&quot;font-size: 16px;&quot;&gt;rf.Start()内部需要先调用rf.GetState()获取raft peer的状态，但是&lt;b&gt;GetState()内部需要请求锁rf.mu&lt;/b&gt;，导致rf.Start()也只能等待&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="350" y="525" width="200" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="bp1sv8VDgxhbqyy1A0z1-13" value="&lt;span style=&quot;font-size: 16px;&quot;&gt;&lt;font face=&quot;Comic Sans MS&quot;&gt;handle等待rf.Start()执行结束才释放kv.mu&lt;/font&gt;&lt;/span&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="260" y="360" width="170" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="bp1sv8VDgxhbqyy1A0z1-14" value="" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="850" y="235" as="sourcePoint" />
+            <mxPoint x="610" y="234.5" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="bp1sv8VDgxhbqyy1A0z1-15" value="" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="610" y="590" as="sourcePoint" />
+            <mxPoint x="850" y="590" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="bp1sv8VDgxhbqyy1A0z1-16" value="&lt;span style=&quot;font-size: 16px;&quot;&gt;&lt;font face=&quot;Comic Sans MS&quot;&gt;rf.GetState()等待rf.applier()将lastApplied到commitIndex之间的日志都apply发送到applyCh后才能请求到rf.mu&lt;/font&gt;&lt;/span&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="620" y="460" width="190" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="bp1sv8VDgxhbqyy1A0z1-17" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;br&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="880" y="500" width="260" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="bp1sv8VDgxhbqyy1A0z1-18" value="&lt;font style=&quot;font-size: 16px;&quot;&gt;rf.applier()&lt;b&gt;先持有锁rf.mu&lt;/b&gt;，直到日志apply到commitIndex的位置前都不会释放rf.mu，但是每个日志apply需要将applyMsg发送到applyCh，&lt;b&gt;如果kv.applyMessage()不在另一端取出applyMsg这边就无法发送后续的applyMsg&lt;/b&gt;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="901.88" y="517.5" width="218.12" height="162.5" as="geometry" />
+        </mxCell>
+        <mxCell id="bp1sv8VDgxhbqyy1A0z1-19" value="" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;" parent="1" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1009.5" y="480" as="sourcePoint" />
+            <mxPoint x="1010" y="340" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="bp1sv8VDgxhbqyy1A0z1-21" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;br&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="880" y="140" width="260" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="bp1sv8VDgxhbqyy1A0z1-22" value="&lt;span style=&quot;font-size: 16px;&quot;&gt;kv.applyMessage()在&lt;b&gt;等待请求锁kv.mu&lt;/b&gt;，如果请求不到锁，也就无法执行后面在状态机应用拿到命令，也就&lt;b&gt;无法进入下一次循环从applyCh中取出下一个applyMsg&lt;/b&gt;。由于applyCh无缓冲，因此rf.applier()就无法继续发送&lt;/span&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="900" y="158.75" width="220" height="152.5" as="geometry" />
+        </mxCell>
+        <mxCell id="bp1sv8VDgxhbqyy1A0z1-23" value="&lt;span style=&quot;font-size: 16px;&quot;&gt;&lt;font face=&quot;Comic Sans MS&quot;&gt;rf.applier()等待kv.applyMessage()从applyCh中取出发送的所有applyMsg才释放rf.mu&lt;/font&gt;&lt;/span&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="1020" y="370" width="260" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="bp1sv8VDgxhbqyy1A0z1-24" value="&lt;span style=&quot;font-size: 16px;&quot;&gt;&lt;font face=&quot;Comic Sans MS&quot;&gt;kv.applyMessage()等待handle函数释放kv.mu才能请求到kv.mu，从而继续在状态机执行命令&lt;/font&gt;&lt;/span&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
+          <mxGeometry x="640" y="110" width="190" height="130" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
