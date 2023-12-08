@@ -972,7 +972,7 @@ func (sm *ShardMaster) Query(args *QueryArgs, reply *QueryReply) {
   - 如果这次请求的序号**等于**该client上一个已经完成的请求的序号，那么代表回复丢失或延迟导致client没收到而重发了这个请求，其实该请求一种执行过了，这时直接将对应`session`中保存的上次执行完的结果返回给client即可，而不再次执行。
   - 如果这次请求的序号**大于**该client上一个已经完成的请求的序号，那么代表这次请求是尚未执行的新请求，需要下到raft共识然后由shardmaster实际执行后回复结果给client。（最主要的逻辑）
 
-- 判断是新请求后**，首先如果持有`sm.mu`一定要先解锁**，然后根据指令类型初始化一个对应的指令`Op`，调用`sm.rf.Start()`来查看该server是否是leader（**一定要在调用`rf.Start()`前确保没持有`kv.mu`！**因为`Start()`内部需要持有`rf.mu`，很容易发生**四向锁**）。另外，请求的指令也是通过调用`sm.rf.Start()`来**下放到raft层进行共识**的，现在需要等待该指令共识完成后通过`applyCh`传回来在状态机上apply。
+- 判断是新请求后，**首先如果持有`sm.mu`一定要先解锁**，然后根据指令类型初始化一个对应的指令`Op`，调用`sm.rf.Start()`来查看该server是否是leader（**一定要在调用`rf.Start()`前确保没持有`kv.mu`！**因为`Start()`内部需要持有`rf.mu`，很容易发生**四向锁**）。另外，请求的指令也是通过调用`sm.rf.Start()`来**下放到raft层进行共识**的，现在需要等待该指令共识完成后通过`applyCh`传回来在状态机上apply。
 
   如果请求的server不是leader，则直接将reply的`WrongLeader`置为true返回，因为非leader是没有权限接受请求的。
 
@@ -1359,7 +1359,7 @@ func shardLoadBalance(groups map[int][]string, lastShards [NShards]int) [NShards
   这里采用的分配规则如下：
 
   1. 对`gidSlice`进行**排序**，排序的规则是：**当前**负载大的group排在前面，若负载相同则gid小的排在前面，这样就能保证排序后得到的`gidSlice`切片**唯一**且负载越大的gid排得越靠前。
-  2. 将排序好的`gidSlice`的**前`remainder`个**gid对应的group最终分配`(avgShardNum+1)`个shard**，后`(groupNum-remainder)`个**gid对应的group最终分配`avgShardNum`个shard。
+  2. 将排序好的`gidSlice`的**前`remainder`个**gid对应的group最终分配`(avgShardNum+1)`个shard，**后`(groupNum-remainder)`个**gid对应的group最终分配`avgShardNum`个shard。
 
   **这样就唯一确定了新配置中各组最终需要负责的shard数量**。并且之前就负载大的group之后负载多一个shard，之前负载小的group之后负载少一个shard**整体上需要迁移的shard数量最少**。
 
@@ -2012,7 +2012,7 @@ func (kv *ShardKV) PutAppend(args *PutAppendArgs, reply *PutAppendReply) {
   }
   ```
 
-  先通过key找到所属的shard序号，只要该shardkv记录的`ownedShards`数组中对应shard的状态**不为`Exist`**就认为该shard已经不归该group管了。（该shard可能不存在，可能正在请求迁移过来，也可能准备迁移走，这些情况都不能回复相关的client请求）
+  先通过key找到所属的shard序号，只要该shardkv记录的`ownedShards`数组中对应shard的状态不为`Exist`就认为该shard已经不归该group管了。（该shard可能不存在，可能正在请求迁移过来，也可能准备迁移走，这些情况都不能回复相关的client请求）
 
 - 由于Get操作不会改变状态机状态，因此在**本次实验中并不对重复的Get请求进行过滤**。而`PutAppend()`最前面会先进行重复指令的过滤，防止重复指令重复执行导致状态错误。这里是第一道防线，过滤原理见之前的介绍。
 
@@ -2956,7 +2956,7 @@ Lab 4 关于主被动快照的实现与 Lab 3 中基本一样，需要做一点�
 
 
 
-**改正：**由于`kv.DB`外层map的key为shard序号，因此key最多有`NShards`个且已知，于是我直接在`StartServer()`函数初始化`kv.kvDB`时就将内层的map初始化，防止后面为内层map赋值时报panic，也省去在每次赋值前都检查内层map是否为nil。
+**改正**：由于`kv.DB`外层map的key为shard序号，因此key最多有`NShards`个且已知，于是我直接在`StartServer()`函数初始化`kv.kvDB`时就将内层的map初始化，防止后面为内层map赋值时报panic，也省去在每次赋值前都检查内层map是否为nil。
 
 ```go
 	// 用嵌套map来以shard为单位存储键值对，外层map的key为shard的序号，value为该shard内的键值对map
