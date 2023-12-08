@@ -1643,7 +1643,7 @@ func (rf *Raft) AppendEntries(args *AppendEntriesArgs, reply *AppendEntriesReply
 }
 ```
 
-- 用样地，先检查`args`中的term，进行对应的处理。
+- 同样地，先检查`args`中的term，进行对应的处理。
 - term检查完毕后证明该server具备接受该RPC的前提条件，将状态设为follower并重置计时器（无论日志是否匹配或是心跳包这次都要重置接收者的计时器以维持leader的统治）。
 - 涉及到lab3增加快照后的改动到后面再介绍。
 - 然后根据server自己的log和`args`中的`PreLogIndex`和`PreLogTerm`来检查是否日志匹配，若匹配则在自己的日志追加`args`中的`Entries`，若不匹配则根据日志加速回溯优化在reply中返回相关信息帮助leader定位下次发送哪里开始的日志。
@@ -2168,9 +2168,9 @@ type LogEntry struct {
   rf.mu.Unlock()
   ```
 
-  **错误的原因：**`args.Term`或许和`rf.currentTerm`不一样。因为每个RPC都在单独的goroutine中被发送，在这个过程中，可能Candidate接收到了其他server的RPC改变了自己的`currentTerm`，可能经过了许多个term而这个server可能不再是Candidate。
+  **错误的原因**：`args.Term`或许和`rf.currentTerm`不一样。因为每个RPC都在单独的goroutine中被发送，在这个过程中，可能Candidate接收到了其他server的RPC改变了自己的`currentTerm`，可能经过了许多个term而这个server可能不再是Candidate。
 
-  **修复的做法：**创建的goroutines使用外部代码中`rf.currentTerm`的副本。`Call()`之后的reply处理部分的代码在再次请求锁之后必须再次检查相关的假设（例如，它必须检查自从决定成为Candidate之后`rf.currentTerm`没有改变）。
+  **修复的做法**：创建的goroutines使用外部代码中`rf.currentTerm`的副本。`Call()`之后的reply处理部分的代码在再次请求锁之后必须再次检查相关的假设（例如，它必须检查自从决定成为Candidate之后`rf.currentTerm`没有改变）。
 
 
 
@@ -2243,7 +2243,7 @@ type LogEntry struct {
 
      ![image-20230620100631756](Lab2-README.assets/image-20230620100631756.png)
 
-     我像`Convert2Candidate()`那样对它整个加锁，但在实际测试的过程中，经常会在此函数报`DATA RACE`或死锁。因为调用`Convert2Follower()`的地方大多是`RunForElection()`、`LeaderAppendEntries()`等函数，这些函数在外部已经由于其他逻辑而持有了`rf.mu`锁，那么到调用`Convert2Follower()`时执行到里面又会请求`rf.mu`锁。外部函数由于`Convert2Follower()`无法继续执行而阻塞在这里无法释放锁，而`Convert2Follower()`内部又在等待外部函数释放锁，就这样发生了死锁。但是如果不在`Convert2Follower()`里面加锁又会出现`DATA RACE`，暂时没想出好的办法。所以**我选择将`Convert2Follower()`删除，然后将其中修改可变成员变量的代码直接放在了调用此函数的逻辑处，然后在那里统一管理锁。**之前文章中提到`Convert2Follower()`均为还没有调试到这一步写的，也算是我调试思路的一个记录吧XD。
+     我像`Convert2Candidate()`那样对它整个加锁，但在实际测试的过程中，经常会在此函数报`DATA RACE`或死锁。因为调用`Convert2Follower()`的地方大多是`RunForElection()`、`LeaderAppendEntries()`等函数，这些函数在外部已经由于其他逻辑而持有了`rf.mu`锁，那么到调用`Convert2Follower()`时执行到里面又会请求`rf.mu`锁。外部函数由于`Convert2Follower()`无法继续执行而阻塞在这里无法释放锁，而`Convert2Follower()`内部又在等待外部函数释放锁，就这样发生了死锁。但是如果不在`Convert2Follower()`里面加锁又会出现`DATA RACE`，暂时没想出好的办法。所以**我选择将`Convert2Follower()`删除，然后将其中修改可变成员变量的代码直接放在了调用此函数的逻辑处，然后在那里统一管理锁**。之前文章中提到`Convert2Follower()`均为还没有调试到这一步写的，也算是我调试思路的一个记录吧XD。
 
 3. 对于Candidate请求投票的函数``RunForElection()`以及leader发送AppendEntries RPC的函数`LeaderAppendEntries()`加细粒度的锁，里面逻辑较复杂，需要仔细斟酌。
 
