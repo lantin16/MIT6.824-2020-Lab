@@ -462,7 +462,7 @@ type Master struct {
 
 - TaskMap
 
-  **记录所有`Working`和`Finished`的Task信息**（注意**`Waiting`状态的任务是放在对应的channel里**而不在这个map中）。类型为map[int]*Task，key是TaskId，value是对应的任务。是为了方便Master管理任务，获得任务进行情况（当任务分配后更新）。在mr工作都完成后TaskMap就有了所有的任务。
+  **记录所有`Working`和`Finished`的Task信息**（注意`Waiting`状态的任务是放在对应的channel里而不在这个map中）。类型为map[int]*Task，key是TaskId，value是对应的任务。是为了方便Master管理任务，获得任务进行情况（当任务分配后更新）。在mr工作都完成后TaskMap就有了所有的任务。
 
 - MapperNum
 
@@ -928,7 +928,7 @@ RPC示例中有很多代码可以直接拿来用，比如master的`server()`以�
 
    ——每次channel为空时检测对应阶段任务是否都执行完了，若是则通知worker后转向下一阶段。具体逻辑见`AssignTask`方法的对应分支。
 
-4. 既然`MakeMapTask()`方法是在`MakeMaster`时调用制作map任务，那么**`MakeReduceTask()`方法是在什么时候调用制作reduce任务**呢？
+4. 既然`MakeMapTask()`方法是在`MakeMaster`时调用制作map任务，**那么`MakeReduceTask()`方法是在什么时候调用制作reduce任务呢**？
 
    ——在`toNextPhase()`方法中，map阶段向reduce阶段转换时制作reduce任务。由于reduce任务的输入文件时map任务生成的多个中间文件，所以需要map阶段执行完毕后才能制作reduce任务，这一点在lab的说明中也提到"reduces得等到最后一个map完成后才能开始"。
 
