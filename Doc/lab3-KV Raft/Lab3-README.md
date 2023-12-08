@@ -393,7 +393,7 @@ type Clerk struct {
 }
 ```
 
-- `servers`可以理解为kvserver集群的指针切片，但是要注意虽然都是kvserver的所有server，但这里的序号跟``StartKVServer()`中初始化kvserver集群中序号是**不对应**的！（从`config.go`的`makeClient()`中可以看出，构建client时的servers切片是经过了一次打乱顺序处理了的，虽然我不清楚为什么要这么做）这可能直接导致你在实现client快速重新定位leader时出现错误，具体见5.2.1.2。
+- `servers`可以理解为kvserver集群的指针切片，但是要注意虽然都是kvserver的所有server，但这里的序号跟`StartKVServer()`中初始化kvserver集群中序号是**不对应**的！（从`config.go`的`makeClient()`中可以看出，构建client时的servers切片是经过了一次打乱顺序处理了的，虽然我不清楚为什么要这么做）这可能直接导致你在实现client快速重新定位leader时出现错误，具体见5.2.1.2。
 - `clientId`是用来唯一标识client，为随机生成的`int64`类型，在本次实验中可认为不会重复。
 - `knownLeader`是为了client请求到非leader的server后用于下一次快速找到leader使用的。
 - `commandNum`记录该client请求的command序号到哪里了，用来防止改变状态机状态的command被重复执行而发生错误，采用从1开始的自增实现。
@@ -900,7 +900,7 @@ func (kv *KVServer) PutAppend(args *PutAppendArgs, reply *PutAppendReply) {
   - 如果这次请求的序号**等于**该client上一个已经完成的请求的序号，那么代表回复丢失或延迟导致client没收到而重发了这个请求，其实该请求一种执行过了，这时直接将对应`session`中保存的上次执行完的结果返回给client即可，而不再次执行。
   - 如果这次请求的序号**大于**该client上一个已经完成的请求的序号，那么代表这次请求是尚未执行的新请求，需要下到raft共识然后由kvserver实际执行后回复结果给client。（最主要的逻辑）
 
-- 判断是新请求后**，首先如果持有`kv.mu`一定要先解锁**，然后初始化一个指令`Op`，调用`kv.rf.Start()`来查看该kvserver是否是leader（**一定要在调用`rf.Start()`前确保没持有`kv.mu`！**因为`Start()`内部需要持有`rf.mu`，很容易发生**四向锁**，具体见5.2.1.4）。另外，请求的指令也是通过调用`kv.rf.Start()`来**下放到raft层进行共识**的，现在需要等待该指令共识完成后通过`applyCh`传回来在状态机上apply。
+- 判断是新请求后，**首先如果持有`kv.mu`一定要先解锁**，然后初始化一个指令`Op`，调用`kv.rf.Start()`来查看该kvserver是否是leader（**一定要在调用`rf.Start()`前确保没持有`kv.mu`！**因为`Start()`内部需要持有`rf.mu`，很容易发生**四向锁**，具体见5.2.1.4）。另外，请求的指令也是通过调用`kv.rf.Start()`来**下放到raft层进行共识**的，现在需要等待该指令共识完成后通过`applyCh`传回来在状态机上apply。
 
   如果请求的kvserver不是leader，则直接返回`ErrWrongLeader`，因为非leader是没有权限接受请求的。
 
@@ -1800,7 +1800,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 
 
 
-**改正：**因此我选择将reply的初始化放入for循环内部，这样每次重发都重新初始化一个`reply`，就不会收到非请求本次的回复：
+**改正**：因此我选择将reply的初始化放入for循环内部，这样每次重发都重新初始化一个`reply`，就不会收到非请求本次的回复：
 
 ![image-20230718165015252](Lab3-README.assets/image-20230718165015252.png)
 
@@ -1874,7 +1874,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 
    ![image-20230720113806291](Lab3-README.assets/image-20230720113806291.png)
 
-   由于`kv.applyMessage()`阻塞在了`rf.GetState()`（请求`rf.mu`）而**无法从`applyCh`中取出下一条指令**，`rf.mu`又在raft层被**`rf.applier()`在for循环之前就占有了**，不执行完for循环将`rf.lastApplied`到`rf.commitIndex`之间的指令全部apply锁就无法释放。但是由于`applyCh`在`StartKVServer()`中初始化为了**不带缓冲**的channel，因此如果KVServer不执行到`applyMessage()`后面从`applyCh`中取出下一条指令，`rf.applier()`就无法将剩下的指令发送到`applyCh`，也就无法释放锁`rf.mu`。因此发生了死锁。
+   由于`kv.applyMessage()`阻塞在了`rf.GetState()`（请求`rf.mu`）而**无法从`applyCh`中取出下一条指令**，`rf.mu`又在raft层被`rf.applier()`在for循环之前就占有了，不执行完for循环将`rf.lastApplied`到`rf.commitIndex`之间的指令全部apply锁就无法释放。但是由于`applyCh`在`StartKVServer()`中初始化为了**不带缓冲**的channel，因此如果KVServer不执行到`applyMessage()`后面从`applyCh`中取出下一条指令，`rf.applier()`就无法将剩下的指令发送到`applyCh`，也就无法释放锁`rf.mu`。因此发生了死锁。
 
    
 
@@ -1927,9 +1927,9 @@ func Make(peers []*labrpc.ClientEnd, me int,
 
 ![image-20230721173833142](Lab3-README.assets/image-20230721173833142.png)
 
-1. 当leader一边在`applyMessage()`等待请求锁`kv.mu`时，此时有另一个client发来了它的请求，并且通过RPC调用了leader的handle**先拿到了锁**`kv.mu`，但是它执行到了`kv.rf.Start()`由于`Start()`内部要调用`rf.GetState()`，而**`GetState()`里面要请求`rf.mu`**，于是这个handle就拿着`kv.mu`一直在等待`GetState()`拿到`rf.mu`执行完才能释放锁`kv.mu`。
-2. 那么为什么`GetState()`拿不到`rf.mu`呢？原来此时raft层的`applier()`正在apply `rf.lastApplied` 到`rf.commitIndex`之间的日志，**`applier()`在for循环将这之间的日志全部apply之前都不会释放`rf.mu`**。
-3. 那么是什么让`applier()`无法执行完for循环呢？原来要apply一个日志需要生成`applyMsg`并将其发送到`applyCh`，但是由于**`applyCh`被初始化为无缓冲的channel**，因此**如果`applyMessage()`侧不从`applyCh`中取出`applyMsg`那`applier()`就无法向其中发送**，也就不能apply后面的日志，for循环也就不能结束，不能释放`rf.mu`。
+1. 当leader一边在`applyMessage()`等待请求锁`kv.mu`时，此时有另一个client发来了它的请求，并且通过RPC调用了leader的handle**先拿到了锁**`kv.mu`，但是它执行到了`kv.rf.Start()`由于`Start()`内部要调用`rf.GetState()`，而`GetState()`里面要请求`rf.mu`，于是这个handle就拿着`kv.mu`一直在等待`GetState()`拿到`rf.mu`执行完才能释放锁`kv.mu`。
+2. 那么为什么`GetState()`拿不到`rf.mu`呢？原来此时raft层的`applier()`正在apply `rf.lastApplied` 到`rf.commitIndex`之间的日志，`applier()`**在for循环将这之间的日志全部apply之前都不会释放**`rf.mu`。
+3. 那么是什么让`applier()`无法执行完for循环呢？原来要apply一个日志需要生成`applyMsg`并将其发送到`applyCh`，但是由于`applyCh`被初始化为无缓冲的channel，因此**如果`applyMessage()`侧不从`applyCh`中取出`applyMsg`那`applier()`就无法向其中发送**，也就不能apply后面的日志，for循环也就不能结束，不能释放`rf.mu`。
 4. 那么为什么`applyMessage()`不从`applyCh`中取`applyMsg`好让`applier()`继续向其中发送呢？这就回到了第一点，由于leader请求不到`kv.mu`，执行不了命令，也就进入不了下一次循环而无法继续从`applyCh`中取。
 
 
@@ -1952,7 +1952,7 @@ func Make(peers []*labrpc.ClientEnd, me int,
 
 
 
-**改正：**既然`kv.mu`实际会影响`rf.Start()`而修改`kv.notifyMapCh[index]`又确实需要`kv.mu`保护，那么我在前面不需要锁的地方先解锁，执行完`rf.Start()`再重新加锁来保护的更新不就好了，修改后如下：
+**改正**：既然`kv.mu`实际会影响`rf.Start()`而修改`kv.notifyMapCh[index]`又确实需要`kv.mu`保护，那么我在前面不需要锁的地方先解锁，执行完`rf.Start()`再重新加锁来保护的更新不就好了，修改后如下：
 
 ![image-20230721203839503](Lab3-README.assets/image-20230721203839503.png)
 
@@ -2158,7 +2158,7 @@ ok      6.824/src/kvraft        435.333s
 
 
 
-**改正：**在主动快照方法`Snapshot()`裁剪log前加一个判断，如果主动快照的index不大于rf之前的lastIncludedIndex（这次快照其实是重复或更旧的），则不应用该快照，直接返回。
+**改正**：在主动快照方法`Snapshot()`裁剪log前加一个判断，如果主动快照的index不大于rf之前的lastIncludedIndex（这次快照其实是重复或更旧的），则不应用该快照，直接返回。
 
 ![image-20230726093053987](Lab3-README.assets/image-20230726093053987.png)
 
@@ -2186,7 +2186,7 @@ ok      6.824/src/kvraft        435.333s
 
   ![image-20231113101746487](Lab3-README.assets/image-20231113101746487.png)
 
-- **被动快照**：被动快照是follower接收到leader发来的安装快照RPC并决定安装快照后，先在raft层裁剪日志、持久化等，再发送到对应的kvserver实际安装到应用层。leader发来的快照截止位置可能有两种情况，一是**follower还没有apply到这**，这个快照是帮助follower尽快追赶上leader的进度，那么这种情况下**`rf.commitIndex`和`rf.lastApplied`直接更新到快照截止的index即可**；二是follower已经apply到了更后面，这个快照是帮助follower裁剪日志的，那么这种情况下**`rf.lastApplied`回退到到快照截止的index（因为被动快照是要发送到kvserver安装的，因此后面会直接将数据库等上层状态修改到被动快照的状态，那么快照之后的指令必须重新apply，否则会出现日志应用的丢失）**，**`rf.commitIndex`这种情况下可不回退（因为回退后也会在下一次的AppendEntries后更新到后面的值）**。另外，如果follower的日志与快照在快照截止位置的term不一致那么也需要将快照之后的日志丢弃（以leader为准）。
+- **被动快照**：被动快照是follower接收到leader发来的安装快照RPC并决定安装快照后，先在raft层裁剪日志、持久化等，再发送到对应的kvserver实际安装到应用层。leader发来的快照截止位置可能有两种情况，一是**follower还没有apply到这**，这个快照是帮助follower尽快追赶上leader的进度，那么这种情况下`rf.commitIndex`和`rf.lastApplied`直接更新到快照截止的index即可；二是follower已经apply到了更后面，这个快照是帮助follower裁剪日志的，那么这种情况下`rf.lastApplied`回退到到快照截止的index（因为被动快照是要发送到kvserver安装的，因此后面会直接将数据库等上层状态修改到被动快照的状态，那么快照之后的指令必须重新apply，否则会出现日志应用的丢失），`rf.commitIndex`这种情况下可不回退（因为回退后也会在下一次的AppendEntries后更新到后面的值）。另外，如果follower的日志与快照在快照截止位置的term不一致那么也需要将快照之后的日志丢弃（以leader为准）。
 
   ![image-20231113103033241](Lab3-README.assets/image-20231113103033241.png)
 
@@ -2204,7 +2204,7 @@ ok      6.824/src/kvraft        435.333s
 
 我尝试过一种“治标不治本”的方法，既然是卡死在`kv.rf.Start()`走不到超时逻辑才无法继续的，那么我在client发出请求的时候就在client端开启一个超时检测，client迟迟收不到回复就在更上层的位置超时并请求其他server。由于失联了一台server还有多数server存活，因此也还是“看起来”解决了问题（其实并没有==!）。
 
-后面我进一步探索为什么进到`kv.rf.Start()`会出不来，是哪里发生了死锁，最后看了茫茫多的日志之后总算发现是**`rf.Start()`和`rf.applier()`发生了死锁**！我在**`rf.applier()`中的实现是每次拿到锁后将`lastApplied`到`commitIndex`之间的日志都apply再释放锁，这样就会导致其他协程无法拿到`rf.mu`，一旦`rf.applier()`中阻塞在发送到channel那，锁就一直无法释放**。如下图所示：
+后面我进一步探索为什么进到`kv.rf.Start()`会出不来，是哪里发生了死锁，最后看了茫茫多的日志之后总算发现是`rf.Start()`和`rf.applier()`发生了死锁！我在`rf.applier()`中的实现是每次拿到锁后将`lastApplied`到`commitIndex`之间的日志都apply再释放锁，这样就会导致其他协程无法拿到`rf.mu`，一旦`rf.applier()`中阻塞在发送到channel那，锁就一直无法释放。如下图所示：
 
 ![image-20231113105047799](Lab3-README.assets/image-20231113105047799.png)
 
@@ -2322,7 +2322,7 @@ ok      6.824/src/kvraft        435.333s
 
 ![生成发送非原子](Lab3-README.assets/生成发送非原子.svg)
 
-我将图中log[200]这种成为“跨快照指令”，因为它在生成和发送到applyCh之间插入了一次被动快照，从而导致发送延后更改了kvserver的某些状态而使某些指令丢失。根本原因是**`rf.applier()`中检查并生成msg和将msg发送到applyCh两个操作是非原子的**。但是根据之前的修改可知如果将发送放在锁内可能发生死锁，因此另寻他法。
+我将图中log[200]这种成为“跨快照指令”，因为它在生成和发送到applyCh之间插入了一次被动快照，从而导致发送延后更改了kvserver的某些状态而使某些指令丢失。根本原因是`rf.applier()`中检查并生成msg和将msg发送到applyCh两个操作是**非原子**的。但是根据之前的修改可知如果将发送放在锁内可能发生死锁，因此另寻他法。
 
 最后我选择在`KVServer`结构体中加一个标志变量`passiveSnapshotBefore`来标志上一个从`applyCh`中取出的是快照。通过这个标志在每次从`applyCh`中取出指令并apply前先检查，**如果上一次刚刚取出快照并安装完成，则紧接着的这个指令应该是快照位置紧接着的下一个index的指令**，若不是，则认为是出现了“跨快照指令”。这种指令的处理方法也很简单，就是直接忽略不应用，也不改变`kv.logLastApplied`，继续从`applyCh`取下一条指令，直到取出快照后紧接着的那条指令才应用，然后就可以将`passiveSnapshotBefore`改回false，按照常理，跨快照指令每次最多只会有一条。
 
